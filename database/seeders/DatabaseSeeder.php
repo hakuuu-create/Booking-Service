@@ -10,5 +10,6 @@ class DatabaseSeeder extends Seeder
     {
         
         $this->call(MasterDataSeeder::class); 
+        $this->call(SparePartSeeder::class);
     }
 }

@@ -257,6 +257,16 @@
                         </a>
                         @endif
 
+                        {{-- >>> TOMBOL GUDANG / INVENTORY (DITAMBAHKAN DI SINI) <<< --}}
+                        @if(Route::has('inventory.index'))
+                        <a href="{{ route('inventory.index') }}" class="nav-link {{ Route::is('inventory.*') ? 'active' : '' }}" title="Gudang" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="fas fa-boxes-stacked"></i>
+                            <span class="d-md-block d-none small mt-1">Gudang</span>
+                            <span class="d-md-none">Inventory</span>
+                        </a>
+                        @endif
+                        {{-- >>> ------------------------------------------------ <<< --}}
+
                         <a href="{{ route('customers.index') }}" class="nav-link {{ Route::is('customers.index') ? 'active' : '' }}" title="Pelanggan" data-bs-toggle="tooltip" data-bs-placement="right">
                             <i class="fas fa-users"></i>
                             <span class="d-md-block d-none small mt-1">User</span>

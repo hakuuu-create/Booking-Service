@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ServiceAdvisorController;
+use App\Http\Controllers\InventoryController;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,21 @@ Route::prefix('advisor')->name('advisor.')->group(function () {
     Route::get('/{advisor}/print', [ServiceAdvisorController::class, 'print'])->name('print');
     // Rute update (tambahkan ini karena di controller ada method update)
     Route::put('/{booking}', [ServiceAdvisorController::class, 'update'])->name('update');
+});
+
+// --- Rute Inventory / Gudang ---
+Route::prefix('inventory')->name('inventory.')->group(function () {
+    // Halaman Utama & Search
+    Route::get('/', [InventoryController::class, 'index'])->name('index');
+    
+    // Simpan Barang Baru
+    Route::post('/', [InventoryController::class, 'store'])->name('store');
+    
+    // Update Barang
+    Route::put('/{id}', [InventoryController::class, 'update'])->name('update');
+    
+    // Hapus Barang
+    Route::delete('/{id}', [InventoryController::class, 'destroy'])->name('destroy');
 });
 
 // --- Rute yang Membutuhkan Otentikasi (Auth Middleware) ---

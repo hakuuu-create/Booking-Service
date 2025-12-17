@@ -20,9 +20,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // --- Rute Service Advisor (Dikelompokkan) ---
 Route::prefix('advisor')->name('advisor.')->group(function () {
+    
+    // PERBAIKAN DI SINI:
+    // Hapus "/advisor" di depan, cukup "/{booking}" saja.
+    // Ganti nama route jadi 'show' karena prefix nama sudah 'advisor.'
+    Route::get('/{booking}', [ServiceAdvisorController::class, 'show'])->name('show'); 
+    // Rute lainnya tetap
     Route::get('/create', [ServiceAdvisorController::class, 'create'])->name('create');
     Route::post('/store', [ServiceAdvisorController::class, 'store'])->name('store');
+    // Perbaikan sedikit untuk route print agar konsisten
     Route::get('/{advisor}/print', [ServiceAdvisorController::class, 'print'])->name('print');
+    // Rute update (tambahkan ini karena di controller ada method update)
+    Route::put('/{booking}', [ServiceAdvisorController::class, 'update'])->name('update');
 });
 
 // --- Rute yang Membutuhkan Otentikasi (Auth Middleware) ---

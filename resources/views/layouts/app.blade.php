@@ -237,12 +237,15 @@
                 {{-- SIDEBAR --}}
                 <div class="sidebar collapse d-md-flex" id="sidebarMenu">
                     <div class="nav flex-column w-100 pt-3">
+
+                        {{-- >>> DASHBOARD <<< --}}
                         <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Route::is('admin.dashboard') ? 'active' : '' }}" title="Dashboard" data-bs-toggle="tooltip" data-bs-placement="right">
                             <i class="fas fa-th-large"></i>
                             <span class="d-md-block d-none small mt-1">Home</span>
                             <span class="d-md-none">Dashboard</span>
                         </a>
-                        
+
+                        {{-- >>> BOOKING <<< --}}
                         <a href="{{ route('booking.index') }}" class="nav-link {{ Route::is('booking.index') || Route::is('booking.show') ? 'active' : '' }}" title="Booking Data" data-bs-toggle="tooltip" data-bs-placement="right">
                             <i class="fas fa-calendar-check"></i>
                             <span class="d-md-block d-none small mt-1">Bookings</span>
@@ -257,7 +260,7 @@
                         </a>
                         @endif
 
-                        {{-- >>> TOMBOL GUDANG / INVENTORY (DITAMBAHKAN DI SINI) <<< --}}
+                        {{-- >>> GUDANG / INVENTORY <<< --}}
                         @if(Route::has('inventory.index'))
                         <a href="{{ route('inventory.index') }}" class="nav-link {{ Route::is('inventory.*') ? 'active' : '' }}" title="Gudang" data-bs-toggle="tooltip" data-bs-placement="right">
                             <i class="fas fa-boxes-stacked"></i>
@@ -265,19 +268,20 @@
                             <span class="d-md-none">Inventory</span>
                         </a>
                         @endif
-                        {{-- >>> ------------------------------------------------ <<< --}}
-
-                        <a href="{{ route('customers.index') }}" class="nav-link {{ Route::is('customers.index') ? 'active' : '' }}" title="Pelanggan" data-bs-toggle="tooltip" data-bs-placement="right">
-                            <i class="fas fa-users"></i>
-                            <span class="d-md-block d-none small mt-1">User</span>
-                            <span class="d-md-none">Pelanggan</span>
-                        </a>
-
+                       
+                        {{-- >>> ADVISOR <<< --}}
                         @if(Route::has('advisor.create'))
                         <a href="{{ route('advisor.create') }}" class="nav-link {{ Route::is('advisor.create') ? 'active' : '' }}" title="Advisor" data-bs-toggle="tooltip" data-bs-placement="right">
                             <i class="fas fa-user-tie"></i>
                             <span class="d-md-block d-none small mt-1">Advisor</span>
                             <span class="d-md-none">Service Advisor</span>
+                        </a>
+
+                        {{-- >>> CUSTOMER <<< --}}
+                        <a href="{{ route('customers.index') }}" class="nav-link {{ Route::is('customers.index') ? 'active' : '' }}" title="Pelanggan" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="fas fa-users"></i>
+                            <span class="d-md-block d-none small mt-1">User</span>
+                            <span class="d-md-none">Pelanggan</span>
                         </a>
                         @endif
                     </div>

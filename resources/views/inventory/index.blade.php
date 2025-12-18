@@ -4,14 +4,15 @@
 
 @section('content')
 <style>
-    /* --- CUSTOM STYLES FOR INVENTORY --- */
-    
+    /* --- CSS UNTUK INVENTORY PAGE --- */
+
     /* 1. Horizontal Filter Bar (Snackbar Style) */
     .filter-bar-container {
         overflow-x: auto;
         white-space: nowrap;
         -ms-overflow-style: none;  /* IE and Edge */
         scrollbar-width: none;  /* Firefox */
+        padding-top: 5px;
         padding-bottom: 5px;
     }
     .filter-bar-container::-webkit-scrollbar {
@@ -46,7 +47,7 @@
         box-shadow: 0 4px 10px rgba(204, 0, 0, 0.2);
     }
 
-    /* 2. Product Card Modern */
+    /* 2. Product Card Modern & Overlay Effect */
     .product-card {
         border: none;
         border-radius: 16px;
@@ -62,6 +63,110 @@
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
+
+    /* Tombol Titik Tiga (Kebab Menu) */
+    .btn-card-menu {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(4px);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        opacity: 0; /* Hidden by default */
+        cursor: pointer;
+    }
+
+    .product-card:hover .btn-card-menu {
+        opacity: 1;
+    }
+
+    .btn-card-menu:hover {
+        background: var(--honda-red);
+        color: white;
+    }
+
+    /* Overlay Menu (Muncul saat tombol titik tiga diklik) */
+    .card-overlay-menu {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.6); /* Putih transparan */
+        backdrop-filter: blur(8px); /* EFEK BLUR KACA */
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        transform: scale(1.1);
+    }
+
+    /* Class aktif untuk memunculkan overlay */
+    .product-card.menu-active .card-overlay-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+    }
+
+    /* Tombol di dalam Overlay */
+    .overlay-btn {
+        width: 150px;
+        padding: 10px;
+        border-radius: 50px;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(20px);
+        transition: 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .product-card.menu-active .overlay-btn {
+        transform: translateY(0);
+    }
+
+    /* Tombol Close Overlay (X) */
+    .btn-close-overlay {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: #555;
+        cursor: pointer;
+    }
+    .btn-close-overlay:hover { color: var(--honda-red); }
+
+    .btn-red {
+    background-color: #dc3545; /* merah */
+    border-color: #dc3545;
+    }
+
+    .btn-red:hover {
+        background-color: #bb2d3b;
+        border-color: #bb2d3b;
+    }
+
 
     /* Icon Placeholder Box */
     .product-icon-box {
@@ -103,20 +208,6 @@
         color: #888;
         letter-spacing: 1px;
     }
-
-    /* Action Buttons Overlay (Muncul saat hover) */
-    .card-actions {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        display: flex;
-        gap: 5px;
-        opacity: 0;
-        transition: 0.2s;
-    }
-    .product-card:hover .card-actions {
-        opacity: 1;
-    }
 </style>
 
 <div class="container-fluid py-4 px-4">
@@ -147,41 +238,37 @@
     {{-- FILTER BAR (SNACKBAR STYLE) --}}
     <div class="mb-4">
         <div class="filter-bar-container">
-            {{-- Logic Filter: Menggunakan parameter search URL --}}
+            {{-- Tombol SEMUA --}}
             <a href="{{ route('inventory.index') }}" 
-               class="filter-chip {{ !request('search') ? 'active' : '' }}">
+               class="filter-chip {{ !request('category') ? 'active' : '' }}">
                <i class="fas fa-th-large me-1"></i> Semua
             </a>
             
-            <a href="{{ route('inventory.index', ['search' => 'Oli']) }}" 
-               class="filter-chip {{ request('search') == 'Oli' ? 'active' : '' }}">
+            {{-- Kategori Items --}}
+            <a href="{{ route('inventory.index', ['category' => 'oli']) }}" 
+               class="filter-chip {{ request('category') == 'oli' ? 'active' : '' }}">
                <i class="fas fa-oil-can me-1"></i> Oli
             </a>
             
-            <a href="{{ route('inventory.index', ['search' => 'Ban']) }}" 
-               class="filter-chip {{ request('search') == 'Ban' ? 'active' : '' }}">
+            <a href="{{ route('inventory.index', ['category' => 'ban']) }}" 
+               class="filter-chip {{ request('category') == 'ban' ? 'active' : '' }}">
                <i class="fas fa-compact-disc me-1"></i> Ban
             </a>
-            
-            <a href="{{ route('inventory.index', ['search' => 'Kampas']) }}" 
-               class="filter-chip {{ request('search') == 'Kampas' ? 'active' : '' }}">
-               <i class="fas fa-stop-circle me-1"></i> Kampas Rem
-            </a>
 
-            <a href="{{ route('inventory.index', ['search' => 'Filter']) }}" 
-               class="filter-chip {{ request('search') == 'Filter' ? 'active' : '' }}">
-               <i class="fas fa-filter me-1"></i> Filter
-            </a>
-
-            <a href="{{ route('inventory.index', ['search' => 'Busi']) }}" 
-               class="filter-chip {{ request('search') == 'Busi' ? 'active' : '' }}">
-               <i class="fas fa-bolt me-1"></i> Busi
-            </a>
-
-            <a href="{{ route('inventory.index', ['search' => 'Roller']) }}" 
-                class="filter-chip {{ request('search') == 'Roller' ? 'active' : '' }}">
+            <a href="{{ route('inventory.index', ['category' => 'cvt']) }}" 
+                class="filter-chip {{ request('category') == 'cvt' ? 'active' : '' }}">
                 <i class="fas fa-cog me-1"></i> CVT Parts
              </a>
+
+            <a href="{{ route('inventory.index', ['category' => 'busi']) }}" 
+               class="filter-chip {{ request('category') == 'busi' ? 'active' : '' }}">
+               <i class="fas fa-bolt me-1"></i> Busi & Kelistrikan
+            </a>
+        
+            <a href="{{ route('inventory.index', ['category' => 'sparepart']) }}" 
+               class="filter-chip {{ request('category') == 'sparepart' ? 'active' : '' }}">
+               <i class="fas fa-tools me-1"></i> Sparepart
+            </a>
         </div>
     </div>
 
@@ -202,31 +289,40 @@
             @php
                 $icon = 'fa-box-open';
                 $color = 'text-secondary';
-                if(str_contains(strtolower($part->name), 'oli')) { $icon = 'fa-oil-can'; $color = 'text-warning'; }
-                elseif(str_contains(strtolower($part->name), 'ban')) { $icon = 'fa-compact-disc'; $color = 'text-dark'; }
-                elseif(str_contains(strtolower($part->name), 'kampas')) { $icon = 'fa-stop-circle'; $color = 'text-danger'; }
-                elseif(str_contains(strtolower($part->name), 'aki')) { $icon = 'fa-car-battery'; $color = 'text-primary'; }
-                elseif(str_contains(strtolower($part->name), 'busi')) { $icon = 'fa-bolt'; $color = 'text-warning'; }
-                elseif(str_contains(strtolower($part->name), 'belt')) { $icon = 'fa-sync-alt'; $color = 'text-dark'; }
+                // Logika icon berdasarkan kategori atau nama
+                if($part->category == 'oli' || str_contains(strtolower($part->name), 'oli')) { $icon = 'fa-oil-can'; $color = 'text-warning'; }
+                elseif($part->category == 'ban' || str_contains(strtolower($part->name), 'ban')) { $icon = 'fa-compact-disc'; $color = 'text-dark'; }
+                elseif($part->category == 'cvt' || str_contains(strtolower($part->name), 'cvt')) { $icon = 'fa-cog'; $color = 'text-secondary'; }
+                elseif($part->category == 'busi' || str_contains(strtolower($part->name), 'busi')) { $icon = 'fa-bolt'; $color = 'text-warning'; }
+                elseif($part->category == 'sparepart' || str_contains(strtolower($part->name), 'kampas')) { $icon = 'fa-tools'; $color = 'text-danger'; }
             @endphp
 
             <div class="col">
-                <div class="product-card h-100">
-                    {{-- Overlay Action Buttons --}}
-                    <div class="card-actions">
-                        <button class="btn btn-sm btn-light shadow-sm rounded-circle" 
-                                data-bs-toggle="modal" data-bs-target="#modalEdit{{ $part->id }}" title="Edit">
-                            <i class="fas fa-pen text-primary small"></i>
+                <div class="product-card h-100 shadow-sm" id="card-{{ $part->id }}">
+                    
+                    {{-- 1. TOMBOL TITIK TIGA (Kiri Atas) --}}
+                    <button class="btn-card-menu" onclick="toggleMenu({{ $part->id }})">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+        
+                    {{-- 2. OVERLAY MENU (Edit & Hapus di Tengah, Background Blur) --}}
+                    <div class="card-overlay-menu" id="overlay-{{ $part->id }}">
+                        <button class="btn-close-overlay" onclick="toggleMenu({{ $part->id }})">&times;</button>
+                        
+                        {{-- Tombol Edit --}}
+                        <button class="overlay-btn btn-light text-primary" 
+                                data-bs-toggle="modal" data-bs-target="#modalEdit{{ $part->id }}">
+                            <i class="fas fa-pen me-2"></i> Edit Barang
                         </button>
-                        <form action="{{ route('inventory.destroy', $part->id) }}" method="POST" onsubmit="return confirm('Hapus barang ini?')">
-                            @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-light shadow-sm rounded-circle" title="Hapus">
-                                <i class="fas fa-trash text-danger small"></i>
-                            </button>
-                        </form>
+        
+                        {{-- Tombol Hapus (Pemicu Custom Alert Component) --}}
+                        <button class="overlay-btn btn-red text-white mt-2" 
+                                onclick="showDeleteAlert({{ $part->id }}, '{{ $part->name }}')">
+                            <i class="fas fa-trash me-2"></i> Hapus
+                        </button>
                     </div>
 
-                    {{-- Visual Header --}}
+                    {{-- 3. Visual Header --}}
                     <div class="product-icon-box">
                         <i class="fas {{ $icon }} {{ $color }}"></i>
                         <div class="stock-badge {{ $part->stock <= 5 ? 'low-stock' : 'safe-stock' }}">
@@ -235,7 +331,7 @@
                         </div>
                     </div>
 
-                    {{-- Card Body --}}
+                    {{-- 4. Card Body --}}
                     <div class="card-body pt-3 pb-2 px-3">
                         <div class="part-code mb-1">{{ $part->part_number }}</div>
                         <h6 class="fw-bold text-dark mb-2 text-truncate" title="{{ $part->name }}">{{ $part->name }}</h6>
@@ -270,6 +366,7 @@
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Kode Part</label>
                                     <input type="text" class="form-control bg-light" value="{{ $part->part_number }}" readonly>
+                                    <small class="text-muted" style="font-size: 0.7rem">*Kode part tidak dapat diubah</small>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Nama Barang</label>
@@ -288,6 +385,17 @@
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Stok Saat Ini</label>
                                     <input type="number" name="stock" class="form-control" value="{{ $part->stock }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Kategori</label>
+                                    <select name="category" class="form-select" required>
+                                        <option value="">Pilih Kategori...</option>
+                                        <option value="oli" {{ $part->category == 'oli' ? 'selected' : '' }}>Oli / Pelumas</option>
+                                        <option value="ban" {{ $part->category == 'ban' ? 'selected' : '' }}>Ban (Tire)</option>
+                                        <option value="cvt" {{ $part->category == 'cvt' ? 'selected' : '' }}>CVT & Transmisi</option>
+                                        <option value="sparepart" {{ $part->category == 'sparepart' ? 'selected' : '' }}>Sparepart Umum</option>
+                                        <option value="busi" {{ $part->category == 'busi' ? 'selected' : '' }}>Kelistrikan / Busi</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="modal-footer border-0 pt-0">
@@ -359,6 +467,18 @@
                             </select>
                         </div>
                     </div>
+                    {{-- Input Kategori Baru --}}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Kategori</label>
+                        <select name="category" class="form-select" required>
+                            <option value="">Pilih Kategori...</option>
+                            <option value="oli">Oli / Pelumas</option>
+                            <option value="ban">Ban (Tire)</option>
+                            <option value="cvt">CVT & Transmisi</option>
+                            <option value="sparepart">Sparepart Umum</option>
+                            <option value="busi">Kelistrikan / Busi</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold w-100">Simpan ke Gudang</button>
@@ -367,4 +487,85 @@
         </div>
     </div>
 </div>
+
+{{-- CUSTOM DELETE ALERT COMPONENT --}}
+<div class="modal fade" id="deleteAlertComponent" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg text-center p-4">
+            
+            {{-- Icon Alert Animasi Sederhana --}}
+            <div class="mb-3">
+                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                    <i class="fas fa-exclamation-triangle fa-3x"></i>
+                </div>
+            </div>
+
+            <h4 class="fw-bold mb-2">Hapus Barang Ini?</h4>
+            <p class="text-muted mb-4">
+                Anda akan menghapus <span id="deleteItemName" class="fw-bold text-dark"></span>.<br>
+                Tindakan ini tidak dapat dibatalkan.
+            </p>
+
+            <div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">
+                    Batal
+                </button>
+                
+                {{-- Form Delete sesungguhnya ada di sini --}}
+                <form id="deleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
+                        Ya, Hapus
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{{-- SCRIPT INTERAKSI --}}
+<script>
+    // Fungsi untuk Toggle Menu Blur
+    function toggleMenu(id) {
+        var card = document.getElementById('card-' + id);
+        
+        // Cek apakah card ini sedang aktif
+        if (card.classList.contains('menu-active')) {
+            card.classList.remove('menu-active');
+        } else {
+            // Tutup semua menu lain dulu biar rapi
+            document.querySelectorAll('.product-card').forEach(function(el) {
+                el.classList.remove('menu-active');
+            });
+            // Buka menu yang diklik
+            card.classList.add('menu-active');
+        }
+    }
+
+    // Fungsi untuk Memunculkan Component Delete Alert
+    function showDeleteAlert(id, name) {
+        // 1. Set Nama Barang di Modal
+        document.getElementById('deleteItemName').innerText = '"' + name + '"';
+        
+        // 2. Set Action URL pada Form Delete
+        var url = "{{ route('inventory.destroy', ':id') }}";
+        url = url.replace(':id', id);
+        document.getElementById('deleteForm').action = url;
+
+        // 3. Tampilkan Modal Bootstrap
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteAlertComponent'));
+        deleteModal.show();
+    }
+
+    // Tutup menu jika klik di luar area
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.product-card')) {
+            document.querySelectorAll('.product-card').forEach(function(el) {
+                el.classList.remove('menu-active');
+            });
+        }
+    });
+</script>
 @endsection

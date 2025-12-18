@@ -12,26 +12,28 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
-        // Mulai query
         $query = SparePart::query();
-
-        // Logika Pencarian / Filter
+    
+        // 1. Filter Kategori (Jika diklik dari Chip/Snackbar)
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category', $request->category);
+        }
+    
+        // 2. Pencarian Text (Jika diketik di Search Box)
         if ($request->has('search') && $request->search != '') {
             $keyword = $request->search;
-            
             $query->where(function($q) use ($keyword) {
                 $q->where('name', 'like', '%' . $keyword . '%')
                   ->orWhere('part_number', 'like', '%' . $keyword . '%');
             });
         }
-
-        // Urutkan: Stok menipis paling atas, lalu barang terbaru
-        // Agar admin langsung 'aware' jika ada barang mau habis
+    
+        // Urutkan & Pagination
         $parts = $query->orderBy('stock', 'asc')
                        ->latest()
-                       ->paginate(12) // 12 item per halaman (cocok untuk grid 3 atau 4 kolom)
-                       ->withQueryString(); // Agar parameter search tetap ada saat pindah halaman
-
+                       ->paginate(12)
+                       ->withQueryString(); // Penting! Agar filter tidak hilang saat ganti halaman
+    
         return view('inventory.index', compact('parts'));
     }
 
@@ -44,6 +46,7 @@ class InventoryController extends Controller
         $request->validate([
             'part_number' => 'required|unique:spare_parts,part_number|max:50',
             'name'        => 'required|string|max:255',
+            'category'    => 'required|string|max:100',
             'price_buy'   => 'required|numeric|min:0',
             'price_sell'  => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
@@ -54,6 +57,7 @@ class InventoryController extends Controller
         SparePart::create([
             'part_number' => strtoupper($request->part_number), // Paksa huruf besar
             'name'        => $request->name,
+            'category'    => $request->category,
             'price_buy'   => $request->price_buy,
             'price_sell'  => $request->price_sell,
             'stock'       => $request->stock,
@@ -73,6 +77,7 @@ class InventoryController extends Controller
         // Validasi (Tanpa part_number karena readonly)
         $request->validate([
             'name'       => 'required|string|max:255',
+            'category'   => 'required|string|max:100',
             'price_buy'  => 'required|numeric|min:0',
             'price_sell' => 'required|numeric|min:0',
             'stock'      => 'required|integer|min:0',
@@ -81,6 +86,7 @@ class InventoryController extends Controller
         // Update Data
         $part->update([
             'name'       => $request->name,
+            'category'   => $request->category,
             'price_buy'  => $request->price_buy,
             'price_sell' => $request->price_sell,
             'stock'      => $request->stock,

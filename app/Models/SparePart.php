@@ -12,6 +12,7 @@ class SparePart extends Model
     protected $fillable = [
         'part_number',
         'name',
+        'category',
         'price_buy',
         'price_sell',
         'stock',
